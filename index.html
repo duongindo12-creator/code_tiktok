@@ -3,13 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I Love You - CreateJS Hearts</title>
-    <!-- Nhúng thư viện CreateJS từ CDN -->
+    <title>I Love You - Heart Effect</title>
+    <!-- Nhúng CreateJS -->
     <script src="https://code.createjs.com/1.0.0/createjs.min.js"></script>
     <style>
-        body {
+        * {
             margin: 0;
-            background-color: #000; /* Nền đen */
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #000;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -18,82 +22,102 @@
         }
         canvas {
             background-color: #000;
+            display: block;
         }
     </style>
 </head>
 <body>
 
-    <canvas id="demoCanvas" width="800" height="600"></canvas>
+    <canvas id="demoCanvas"></canvas>
 
     <script>
         var canvas = document.getElementById("demoCanvas");
-        var stage = new createjs.Stage(canvas);
         
+        // Tự động điều chỉnh kích thước Canvas theo màn hình
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        var stage = new createjs.Stage(canvas);
         var w = canvas.width;
         var h = canvas.height;
 
-        // --- Mảng chứa các hạt trái tim bay ---
+        // --- TĂNG SỐ LƯỢNG TIM TẠI ĐÂY (Spam cực nhiều tim) ---
         var hearts = [];
-        var numHearts = 50; // Số lượng trái tim trên màn hình
+        var numHearts = 250; // Đã tăng từ 50 lên 250 trái tim!
 
-        // Tạo các hình trái tim ngẫu nhiên
+        var colors = ["#ff1493", "#ff69b4", "#da70d6", "#c71585", "#db7093", "#ffb6c1", "#e60073", "#ff007f"];
+
         for (var i = 0; i < numHearts; i++) {
             var heart = new createjs.Shape();
             
-            // Vẽ hình trái tim bằng các đường path đồ họa vector
-            heart.graphics.beginFill(getRandomColor())
+            // Chọn màu ngẫu nhiên
+            var color = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Vẽ đường cong hình trái tim
+            heart.graphics.beginFill(color)
                 .moveTo(0, -5)
                 .bezierCurveTo(-15, -25, -30, 0, 0, 25)
                 .bezierCurveTo(30, 0, 15, -25, 0, -5);
 
-            // Đặt vị trí ngẫu nhiên
+            // Vị trí rải rác khắp màn hình
             heart.x = Math.random() * w;
             heart.y = Math.random() * h;
             
-            // Kích thước và tốc độ bay riêng cho từng trái tim
-            heart.scaleX = heart.scaleY = Math.random() * 0.6 + 0.3;
-            heart.vY = - (Math.random() * 1.5 + 0.5); // Tốc độ bay lên
-            heart.vX = (Math.random() - 0.5) * 1;     // Lắc lư nhẹ theo chiều ngang
+            // Kích thước to nhỏ khác nhau
+            heart.scaleX = heart.scaleY = Math.random() * 0.8 + 0.3;
+            
+            // Độ trong suốt giúp các trái tim đè lên nhau giống hiệu ứng hiệu ứng trong hình
+            heart.alpha = Math.random() * 0.5 + 0.4; 
+            
+            // Xoay nghiêng nhẹ ngẫu nhiên
+            heart.rotation = (Math.random() - 0.5) * 40;
+
+            // Tốc độ bay lên và lắc lư
+            heart.vY = - (Math.random() * 2 + 0.8);
+            heart.vX = (Math.random() - 0.5) * 1.2;
             
             hearts.push(heart);
             stage.addChild(heart);
         }
 
-        // Hàm chọn màu hồng/tím ngẫu nhiên cho trái tim
-        function getRandomColor() {
-            var colors = ["#ff1493", "#ff69b4", "#da70d6", "#c71585", "#db7093", "#ffb6c1"];
-            return colors[Math.floor(Math.random() * colors.length)];
-        }
-
-        // --- Đoạn code chữ của bạn ---
-        var text = new createjs.Text("I LOVE YOU", "bold 50px 'Brush Script MT', cursive", "#ffffff");
+        // --- ĐOẠN CODE DÒNG CHỮ CỦA BẠN ---
+        var text = new createjs.Text("I LOVE YOU", "bold 55px 'Times New Roman', serif", "#ffffff");
         text.textAlign = "center";
         text.x = w / 2;
-        text.y = h / 2 - text.getMeasuredLineHeight();
+        text.y = h / 2 - text.getMeasuredLineHeight() / 2;
+        
+        // Tạo bóng mờ cho chữ nổi bật trên nền tim
+        text.shadow = new createjs.Shadow("#000000", 0, 0, 15);
+        
         stage.addChild(text);
-        // -------------------------
+        // ---------------------------------
 
-        // --- Vòng lặp hoạt ảnh (Animation Loop) ---
+        // Vòng lặp chuyển động
         createjs.Ticker.framerate = 60;
-        createjs.Ticker.on("tick", handleTick);
-
-        function handleTick(event) {
-            // Cho các trái tim bay lên liên tục
+        createjs.Ticker.on("tick", function(event) {
             for (var i = 0; i < hearts.length; i++) {
                 var heart = hearts[i];
                 heart.y += heart.vY;
                 heart.x += heart.vX;
 
-                // Nếu trái tim bay ra khỏi màn hình ở phía trên, đưa nó xuống dưới đáy để lặp lại
-                if (heart.y < -30) {
-                    heart.y = h + 30;
+                // Khi bay vượt khỏi mép trên màn hình -> lặp lại từ phía dưới
+                if (heart.y < -40) {
+                    heart.y = h + 40;
                     heart.x = Math.random() * w;
                 }
             }
-
-            // Vẽ lại stage liên tục để tạo chuyển động mượt mà
             stage.update(event);
-        }
+        });
+
+        // Tự động căn chỉnh khi thay đổi kích thước cửa sổ
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            w = canvas.width;
+            h = canvas.height;
+            text.x = w / 2;
+            text.y = h / 2 - text.getMeasuredLineHeight() / 2;
+        });
     </script>
 
 </body>
