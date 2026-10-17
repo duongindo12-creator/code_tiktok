@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I Love You - CreateJS</title>
+    <!-- Nhúng thư viện CreateJS (EaselJS) từ CDN -->
+    <script src="https://code.createjs.com/1.0.0/createjs.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background-color: #000; /* Nền đen giống trong video */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        canvas {
+            background-color: #111;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Tạo thẻ Canvas để hiển thị đồ họa từ CreateJS -->
+    <canvas id="demoCanvas" width="800" height="600"></canvas>
+
+    <script>
+        // Lấy kích thước màn hình canvas
+        var canvas = document.getElementById("demoCanvas");
+        var stage = new createjs.Stage(canvas);
+        
+        var w = canvas.width;
+        var h = canvas.height;
+
+        // --- Đoạn code của bạn ---
+        var text = new createjs.Text("I LOVE YOU", "bold 50px 'Brush Script MT', cursive", "#ffffff");
+        text.textAlign = "center";
+        text.x = w / 2;
+        text.y = h / 2 - text.getMeasuredLineHeight();
+        stage.addChild(text);
+        // -------------------------
+
+        // Cập nhật lại stage để vẽ chữ lên màn hình
+        stage.update();
+    </script>
+
+</body>
+</html>
